@@ -1,0 +1,8 @@
+mongodb:
+  connection:
+    uri: mongodb://root:pwd@localhost:27017/admin
+    database: admin
+productInfo:
+  baseUrl: http://localhost:8080/productInfoService/product/names
+orderSearch:
+  baseUrl: http://localhost:8080/orderSearchService/order/phone
