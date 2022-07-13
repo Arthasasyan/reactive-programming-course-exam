@@ -15,7 +15,7 @@ public class UserInfoVo {
     private final String productId;
 
     @JsonCreator
-    private UserInfoVo(@JsonProperty("productId") String orderNumber,
+    private UserInfoVo(@JsonProperty("orderNumber") String orderNumber,
                        @JsonProperty("userName") String userName,
                        @JsonProperty("phoneNumber") String phoneNumber,
                        @JsonProperty("productCode") String productCode,

@@ -2,7 +2,6 @@ package com.griddynamics.reactive.course.userinfoservice.service;
 
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.griddynamics.reactive.course.userinfoservice.util.MDCUtil;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,23 +51,32 @@ public class ProductInfoServiceTest {
     @Autowired
     ProductInfoService productInfoService;
 
-    @BeforeAll
-    public static void setUp() {
+    @Test
+    public void testFindByProductCode() {
         stubFor(get(urlPathEqualTo("/productInfoService/product/names"))
                 .withQueryParam("productCode", new EqualToPattern(PRODUCT_CODE))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader(HttpHeader.CONTENT_TYPE.asString(), MediaType.APPLICATION_JSON_VALUE)
                         .withBody(MOCK_RESPONSE)));
-    }
 
-    @Test
-    public void testFindByProductCode() {
         StepVerifier.create(productInfoService.findProductsByCode(PRODUCT_CODE).contextWrite(it -> it.put(MDCUtil.REQUEST_ID_MDC_VALUE, "123")))
                 .expectNextCount(4)
                 .recordWith(ArrayList::new)
                 .thenConsumeWhile(x -> true)
                 .expectRecordedMatches(collection -> collection.stream().allMatch(it -> it.getProductCode().equals(PRODUCT_CODE)))
                 .verifyComplete();
+    }
+
+    @Test
+    public void testFindByProductCodeTimeout() {
+        stubFor(get(urlPathEqualTo("/productInfoService/product/names"))
+                .withQueryParam("productCode", new EqualToPattern(PRODUCT_CODE))
+                .willReturn(aResponse()
+                        .withStatus(408)));
+
+        StepVerifier.create(productInfoService.findProductsByCode(PRODUCT_CODE).contextWrite(it -> it.put(MDCUtil.REQUEST_ID_MDC_VALUE, "123")))
+                .expectComplete()
+                .verify();
     }
 }

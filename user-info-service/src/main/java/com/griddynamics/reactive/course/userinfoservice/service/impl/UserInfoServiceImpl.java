@@ -42,7 +42,7 @@ public class UserInfoServiceImpl implements UserInfoService {
                                 .userName(user.getName())
                                 .build()
                         ))
-                .map(userInfo -> productInfoService.findProductsByCode(userInfo.getProductCode())
+                .flatMap(userInfo -> productInfoService.findProductsByCode(userInfo.getProductCode())
                         .reduce((o1, o2) -> o1.getScore() > o2.getScore() ? o1 : o2)
                         .flatMap(product -> Mono.just(UserInfoVo.newBuilder()
                                 .orderNumber(userInfo.getOrderNumber())
@@ -53,8 +53,7 @@ public class UserInfoServiceImpl implements UserInfoService {
                                 .productName(product.getProductName())
                                 .build())
                         )
-                        .defaultIfEmpty(userInfo)
-                )
-                .flatMap(Flux::from);
+                        .switchIfEmpty(Mono.just(userInfo))
+                );
     }
 }
